@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Strona glowna</title>
+</head>
+<body>
+<h1>Witaj w systemie OSK!</h1>
+
+<div th:if="${admin}">
+    <h2>Panel admina</h2>
+    <ul>
+        <li><a th:href="@{/admin/baza}">Wszystkie informacje z bazy</a></li>
+        <li><a th:href="@{/users}">Uzytkownicy</a></li>
+        <li><a th:href="@{/roles}">Role</a></li>
+    </ul>
+</div>
+
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Wyloguj</button>
+</form>
+</body>
+</html>

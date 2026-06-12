@@ -18,7 +18,7 @@
 
     <tr th:each="r : ${roles}">
         <td th:text="${r.id}"></td>
-        <td th:text="${r.name}"></td>
+        <td th:text="${r.nazwa}"></td>
         <td>
             <a th:href="@{'/roles/delete/' + ${r.id}}">Usuń</a>
         </td>
