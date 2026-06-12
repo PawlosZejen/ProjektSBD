@@ -1,34 +1,29 @@
 package pl.pawlos.bazaaa.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 
 @Entity
+@Table(name = "Kursant")
 public class Kursant {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @NotBlank(message = "Imię jest wymagane")
-    private String imie;
-
-    @NotBlank(message = "Nazwisko jest wymagane")
-    private String nazwisko;
-
-    @Pattern(regexp = "\\d{11}", message = "PESEL musi mieć 11 cyfr")
+    @Column(name = "pesel", length = 11)
     private String pesel;
 
-    @Pattern(regexp = "\\d{9}", message = "Telefon musi mieć 9 cyfr")
+    @Column(name = "imie", length = 50, nullable = false)
+    private String imie;
+
+    @Column(name = "nazwisko", length = 50, nullable = false)
+    private String nazwisko;
+
+    @Column(name = "data_urodzenia", nullable = false)
+    private java.sql.Date dataUrodzenia;
+
+    @Column(name = "telefon", length = 15)
     private String telefon;
 
-    @Email(message = "Niepoprawny email")
+    @Column(name = "email", length = 100)
     private String email;
 
-    @ManyToOne
-    private Kurs kurs;
-
-    // gettery i settery
+    // Gettery i settery
 }
