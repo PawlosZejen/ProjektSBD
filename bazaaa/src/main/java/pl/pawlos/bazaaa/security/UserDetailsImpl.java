@@ -18,8 +18,11 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Teraz to zadziała, bo dodałeś getNazwa() w klasie Role
+        String roleName = user.getRole().getNazwa();
+
         return List.of(
-                new SimpleGrantedAuthority("ROLE_" + user.getRole().getClass())
+                new SimpleGrantedAuthority("ROLE_" + roleName.toUpperCase())
         );
     }
 

@@ -6,25 +6,25 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import pl.pawlos.bazaaa.model.User;
 import pl.pawlos.bazaaa.repository.UserRepository;
-import pl.pawlos.bazaaa.security.UserDetailsImpl;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final UserRepository repo;
+    private final UserRepository userRepository;
 
-    public UserDetailsServiceImpl(UserRepository repo) {
-        this.repo = repo;
+    public UserDetailsServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        User user = repo.findByLogin(login);
+        User user = userRepository.findByLogin(login)
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika: " + login));
 
-        if (user == null) {
-            throw new UsernameNotFoundException("Nie znaleziono użytkownika: " + login);
-        }
-
-        return new UserDetailsImpl(user);
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getLogin())
+                .password(user.getHaslo())
+                .roles(user.getRole().getNazwa().toUpperCase())
+                .build();
     }
 }

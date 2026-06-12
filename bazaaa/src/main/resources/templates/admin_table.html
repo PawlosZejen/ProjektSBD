@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Tabela: ' + ${tableName}">Tabela</title>
+</head>
+<body>
+<h1 th:text="'Tabela: ' + ${tableName}"></h1>
+
+<p><a th:href="@{/admin/baza}">Powrot do listy tabel</a></p>
+
+<table border="1">
+    <tr>
+        <th th:each="column : ${columns}" th:text="${column}"></th>
+    </tr>
+    <tr th:each="row : ${rows}">
+        <td th:each="cell : ${row}" th:text="${cell}"></td>
+    </tr>
+</table>
+
+<p th:if="${#lists.isEmpty(rows)}">Brak danych w tej tabeli.</p>
+</body>
+</html>
