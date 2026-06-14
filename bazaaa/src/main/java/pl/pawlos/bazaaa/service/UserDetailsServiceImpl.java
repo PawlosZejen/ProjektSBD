@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import pl.pawlos.bazaaa.model.User;
 import pl.pawlos.bazaaa.repository.UserRepository;
+import pl.pawlos.bazaaa.security.UserDetailsImpl;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -21,10 +22,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByLogin(login)
                 .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika: " + login));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getLogin())
-                .password(user.getHaslo())
-                .roles(user.getRole().getNazwa().toUpperCase())
-                .build();
+        return new UserDetailsImpl(user);
     }
 }

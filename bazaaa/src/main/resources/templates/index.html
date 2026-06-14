@@ -12,9 +12,19 @@
     <ul>
         <li><a th:href="@{/admin/baza}">Wszystkie informacje z bazy</a></li>
         <li><a th:href="@{/users}">Uzytkownicy</a></li>
+        <li><a th:href="@{/kursanci}">Kursanci</a></li>
         <li><a th:href="@{/roles}">Role</a></li>
     </ul>
 </div>
+
+<div th:if="${!admin}">
+    <h2>Panel Kursanta</h2>
+    <ul>
+        <li><a th:href="@{/kursanci/profile}">Mój profil</a></li>
+    </ul>
+</div>
+
+
 
 <form th:action="@{/logout}" method="post">
     <button type="submit">Wyloguj</button>
