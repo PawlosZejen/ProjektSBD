@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dodaj użytkownika</title>
+</head>
+<body>
+
+<h1>Dodaj użytkownika</h1>
+<p><a th:href="@{/users}">Cofnij</a></p>
+<br>
+<form th:action="@{/users/save}" th:object="${user}" method="post">
+
+    Login:
+    <input type="text" th:field="*{login}">
+    <br><br>
+
+    Hasło:
+    <input type="password" th:field="*{haslo}">
+    <br><br>
+
+    Email:
+    <input type="email" th:field="*{email}">
+    <br><br>
+
+    Rola:
+    <select th:field="*{role}">
+        <option th:each="r : ${roles}"
+                th:value="${r.id}"
+                th:text="${r.nazwa}">
+        </option>
+    </select>
+    <br><br>
+
+    <button type="submit">Zapisz</button>
+</form>
+
+</body>
+</html>

@@ -3,7 +3,7 @@ package pl.pawlos.bazaaa.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "KategoriaPrawaJazdy")
+@Table(name = "kategoriaprawajazdy")
 public class KategoriaPrawaJazdy {
 
     @Id

@@ -43,4 +43,18 @@ public class UserController {
         userService.delete(id);
         return "redirect:/users";
     }
+
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable Long id, Model model) {
+        User user = userService.getById(id);
+        model.addAttribute("user", user);
+        model.addAttribute("roles", roleService.getAll());
+        return "user_edit";
+    }
+
+    @PostMapping("/update")
+    public String update(@ModelAttribute User user) {
+        userService.update(user);
+        return "redirect:/users";
+    }
 }
