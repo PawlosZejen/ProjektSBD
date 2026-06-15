@@ -3,89 +3,175 @@ package pl.pawlos.bazaaa.service;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 public class AdminDatabaseService {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private static final Map<String, String> PRIMARY_KEYS = Map.ofEntries(
+            Map.entry("egzamin", "id_egzaminu"),
+            Map.entry("instruktor", "id_instruktora"),
+            Map.entry("jazda", "id_jazdy"),
+            Map.entry("kategoria_prawa_jazdy", "id_kategorii"),
+            Map.entry("kategoriaprawajazdy", "id_kategorii"),
+            Map.entry("kurs", "id_kursu"),
+            Map.entry("kursant", "pesel"),
+            Map.entry("obecnosc_wyklady", "id_obecnosci"),
+            Map.entry("platnosc", "id_platnosci"),
+            Map.entry("pojazd", "nr_rejestracyjny"),
+            Map.entry("rola", "id"),
+            Map.entry("uzytkownik", "id"),
+            Map.entry("wyklady", "id_wykladu")
+    );
+
+    // tabele z auto-increment PK (bigint + sequence)
+    private static final Set<String> AUTO_PK_TABLES = Set.of(
+            "egzamin",
+            "instruktor",
+            "jazda",
+            "kurs",
+            "obecnosc_wyklady",
+            "platnosc",
+            "rola",
+            "uzytkownik",
+            "wyklady"
+    );
+
     public AdminDatabaseService(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<TableInfo> getTables() {
-        return jdbcTemplate.query("""
-                        select table_name,
-                               (
-                                   select count(*)
-                                   from information_schema.columns c
-                                   where c.table_schema = t.table_schema
-                                     and c.table_name = t.table_name
-                               ) as column_count
-                        from information_schema.tables t
-                        where table_schema = 'public'
-                          and table_type = 'BASE TABLE'
-                        order by table_name
-                        """,
-                (rs, rowNum) -> new TableInfo(
-                        rs.getString("table_name"),
-                        rs.getInt("column_count"),
-                        countRows(rs.getString("table_name"))
-                ));
+    public List<String> getTables() {
+        return jdbcTemplate.queryForList(
+                "SELECT table_name FROM information_schema.tables " +
+                        "WHERE table_schema = 'public' ORDER BY table_name",
+                String.class
+        );
     }
 
     public List<String> getColumns(String tableName) {
-        ensureTableExists(tableName);
         return jdbcTemplate.queryForList("""
-                select column_name
-                from information_schema.columns
-                where table_schema = 'public'
-                  and table_name = ?
-                order by ordinal_position
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = ?
+                ORDER BY ordinal_position
                 """, String.class, tableName);
     }
 
     public List<List<Object>> getRows(String tableName) {
-        ensureTableExists(tableName);
-        return jdbcTemplate.query("select * from " + quoteIdentifier(tableName), (rs, rowNum) -> {
-            ResultSetMetaData metadata = rs.getMetaData();
+        return jdbcTemplate.query("SELECT * FROM \"" + tableName + "\"", (rs, rowNum) -> {
+            ResultSetMetaData meta = rs.getMetaData();
             List<Object> row = new ArrayList<>();
-
-            for (int columnIndex = 1; columnIndex <= metadata.getColumnCount(); columnIndex++) {
-                row.add(rs.getObject(columnIndex));
+            for (int i = 1; i <= meta.getColumnCount(); i++) {
+                row.add(rs.getObject(i));
             }
-
             return row;
         });
     }
 
-    private int countRows(String tableName) {
-        Number count = jdbcTemplate.queryForObject("select count(*) from " + quoteIdentifier(tableName), Number.class);
-        return count == null ? 0 : count.intValue();
+    public String getPrimaryKey(String tableName) {
+        return PRIMARY_KEYS.get(tableName);
     }
 
-    private void ensureTableExists(String tableName) {
-        Integer count = jdbcTemplate.queryForObject("""
-                select count(*)
-                from information_schema.tables
-                where table_schema = 'public'
-                  and table_type = 'BASE TABLE'
-                  and table_name = ?
-                """, Integer.class, tableName);
+    private Map<String, Object> convertTypes(Map<String, String> data) {
+        Map<String, Object> converted = new LinkedHashMap<>();
 
-        if (count == null || count == 0) {
-            throw new IllegalArgumentException("Nie znaleziono tabeli: " + tableName);
+        data.forEach((k, v) -> {
+            if (v == null || v.isBlank()) {
+                converted.put(k, null);
+                return;
+            }
+
+            // integer / bigint
+            if (v.matches("^-?\\d+$")) {
+                // użyj Long dla bezpieczeństwa (bigint)
+                converted.put(k, Long.valueOf(v));
+                return;
+            }
+
+            // double precision
+            if (v.matches("^-?\\d+[\\.,]\\d+$")) {
+                converted.put(k, Double.valueOf(v.replace(',', '.')));
+                return;
+            }
+
+            // date YYYY-MM-DD
+            if (v.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
+                converted.put(k, java.sql.Date.valueOf(LocalDate.parse(v)));
+                return;
+            }
+
+            // timestamp YYYY-MM-DD HH:mm[:ss] lub z T
+            if (v.matches("^\\d{4}-\\d{2}-\\d{2}[ T]\\d{2}:\\d{2}(:\\d{2})?$")) {
+                String norm = v.replace(" ", "T");
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm[:ss]");
+                LocalDateTime dt = LocalDateTime.parse(norm, fmt);
+                converted.put(k, Timestamp.valueOf(dt));
+                return;
+            }
+
+            // tekst
+            converted.put(k, v);
+        });
+
+        return converted;
+    }
+
+    public void insert(String tableName, Map<String, String> data) {
+        String pk = getPrimaryKey(tableName);
+
+        data.remove("_csrf");
+
+        // usuwamy PK tylko dla tabel z auto-increment
+        if (AUTO_PK_TABLES.contains(tableName)) {
+            data.remove(pk);
         }
+
+        Map<String, Object> converted = convertTypes(data);
+
+        String columns = String.join(", ", converted.keySet());
+        String values = String.join(", ", Collections.nCopies(converted.size(), "?"));
+
+        jdbcTemplate.update(
+                "INSERT INTO \"" + tableName + "\" (" + columns + ") VALUES (" + values + ")",
+                converted.values().toArray()
+        );
     }
 
-    private String quoteIdentifier(String identifier) {
-        return "\"" + identifier.replace("\"", "\"\"") + "\"";
+    public void update(String tableName, String pkValue, Map<String, String> data) {
+        String pk = getPrimaryKey(tableName);
+
+        data.remove("_csrf");
+        data.remove(pk);
+
+        Map<String, Object> converted = convertTypes(data);
+
+        String setClause = String.join(", ",
+                converted.keySet().stream().map(c -> c + "=?").toList()
+        );
+
+        List<Object> params = new ArrayList<>(converted.values());
+        params.add(pkValue);
+
+        jdbcTemplate.update(
+                "UPDATE \"" + tableName + "\" SET " + setClause + " WHERE \"" + pk + "\"=?",
+                params.toArray()
+        );
     }
 
-    public record TableInfo(String name, int columnCount, int rowCount) {
+    public void delete(String tableName, String pkValue) {
+        String pk = getPrimaryKey(tableName);
+        jdbcTemplate.update(
+                "DELETE FROM \"" + tableName + "\" WHERE \"" + pk + "\"=?",
+                pkValue
+        );
     }
 }
