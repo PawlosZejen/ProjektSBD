@@ -2,177 +2,22 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="'Tabela: ' + ${tableName}"></title>
+    <title th:text="'Tabela: ' + ${tableName}">Tabela</title>
 </head>
 <body>
-
 <h1 th:text="'Tabela: ' + ${tableName}"></h1>
 
-<p><a th:href="@{/admin/baza}">Powrót</a></p>
+<p><a th:href="@{/admin/baza}">Powrot do listy tabel</a></p>
 
 <table border="1">
     <tr>
-        <th th:each="col : ${columns}" th:text="${col}"></th>
-        <th>Akcje</th>
+        <th th:each="column : ${columns}" th:text="${column}"></th>
     </tr>
-
     <tr th:each="row : ${rows}">
-        <form th:action="@{'/admin/baza/' + ${tableName} + '/update/' + ${row[columns.indexOf(primaryKey)]}}" method="post">
-
-            <td th:each="cell, colStat : ${row}">
-
-                <!-- PK edytowalne dla VARCHAR -->
-                <input th:if="${columns[colStat.index] == primaryKey and (tableName == 'kursant' or tableName == 'pojazd' or tableName == 'kategoria_prawa_jazdy' or tableName == 'kategoriaprawajazdy')}"
-                       type="text" th:name="${columns[colStat.index]}" th:value="${cell}"/>
-
-                <!-- PK tylko wyświetlane dla AUTO -->
-                <span th:if="${columns[colStat.index] == primaryKey and !(tableName == 'kursant' or tableName == 'pojazd' or tableName == 'kategoria_prawa_jazdy' or tableName == 'kategoriaprawajazdy')}"
-                      th:text="${cell}"></span>
-
-                <!-- DATE -->
-                <input th:if="${columns[colStat.index] != primaryKey and (columns[colStat.index] == 'data_urodzenia' or columns[colStat.index] == 'data_rozpoczecia')}"
-                       type="date" th:name="${columns[colStat.index]}" th:value="${#dates.format(cell, 'yyyy-MM-dd')}"/>
-
-                <!-- TIMESTAMP (POPRAWIONY FORMAT) -->
-                <input th:if="${columns[colStat.index] != primaryKey and (columns[colStat.index] == 'termin' or columns[colStat.index] == 'data_wplaty')}"
-                       type="datetime-local"
-                       th:name="${columns[colStat.index]}"
-                       th:value="${#dates.format(cell, 'yyyy-MM-dd''T''HH:mm')}"/>
-
-                <!-- NORMALNE POLE -->
-                <input th:if="${columns[colStat.index] != primaryKey
-                               and columns[colStat.index] != 'data_urodzenia'
-                               and columns[colStat.index] != 'data_rozpoczecia'
-                               and columns[colStat.index] != 'termin'
-                               and columns[colStat.index] != 'data_wplaty'}"
-                       type="text" th:name="${columns[colStat.index]}" th:value="${cell}"/>
-
-                <!-- DOZWOLONE WARTOŚCI -->
-                <div style="font-size: 10px; color: gray;">
-
-                    <span th:if="${columns[colStat.index] == 'rodzaj'}">
-                        Dozwolone: WEWNETRZNY_TEORIA, PANSTWOWY_TEORIA, PANSTWOWY_PRAKTYKA
-                    </span>
-
-                    <span th:if="${columns[colStat.index] == 'wynik'}">
-                        Dozwolone: POZYTYWNY, NEGATYWNY, ZAPLANOWANY, NIEOBECNY
-                    </span>
-
-                    <span th:if="${columns[colStat.index] == 'id_kategorii' or columns[colStat.index] == 'id_kategorii_glownej'}">
-                        Dozwolone: A, A1, A2, B, B1, C, C1, D, D1, T
-                    </span>
-
-                    <span th:if="${columns[colStat.index] == 'status' and tableName == 'kurs'}">
-                        Dozwolone: W_TRAKCIE, ZAKONCZONY, ANULOWANY
-                    </span>
-
-                    <span th:if="${columns[colStat.index] == 'status' and tableName == 'jazda'}">
-                        Dozwolone: ZAPLANOWANA, ODBYTA, ANULOWANA
-                    </span>
-
-                    <span th:if="${columns[colStat.index] == 'metoda_platnosci'}">
-                        Przykłady: GOTÓWKA, KARTA, PRZELEW, BLIK
-                    </span>
-
-                    <span th:if="${columns[colStat.index] == 'nazwa' and tableName == 'rola'}">
-                        Dozwolone: ADMIN, PRACOWNIK, EGZAMINATOR, KURSANT
-                    </span>
-
-                    <span th:if="${columns[colStat.index] == 'id_roli'}">
-                        Dozwolone: 1=ADMIN, 3=PRACOWNIK, 4=EGZAMINATOR, 5=KURSANT
-                    </span>
-
-                </div>
-
-            </td>
-
-            <td>
-                <button type="submit">Zapisz</button>
-        </form>
-
-        <form th:action="@{'/admin/baza/' + ${tableName} + '/delete/' + ${row[columns.indexOf(primaryKey)]}}" method="post">
-            <button type="submit">Usuń</button>
-        </form>
-        </td>
+        <td th:each="cell : ${row}" th:text="${cell}"></td>
     </tr>
 </table>
 
-<h2>Dodaj nowy rekord</h2>
-
-<form th:action="@{'/admin/baza/' + ${tableName} + '/insert'}" method="post">
-
-    <div th:each="col : ${columns}">
-        <label th:text="${col}"></label>
-
-        <!-- PK edytowalne dla VARCHAR -->
-        <input th:if="${col == primaryKey and (tableName == 'kursant' or tableName == 'pojazd' or tableName == 'kategoria_prawa_jazdy' or tableName == 'kategoriaprawajazdy')}"
-               type="text" th:name="${col}"/>
-
-        <!-- PK AUTO -->
-        <span th:if="${col == primaryKey and !(tableName == 'kursant' or tableName == 'pojazd' or tableName == 'kategoria_prawa_jazdy' or tableName == 'kategoriaprawajazdy')}">
-            AUTO
-        </span>
-
-        <!-- DATE -->
-        <input th:if="${col != primaryKey and (col == 'data_urodzenia' or col == 'data_rozpoczecia')}"
-               type="date" th:name="${col}"/>
-
-        <!-- TIMESTAMP (POPRAWIONY FORMAT) -->
-        <input th:if="${col != primaryKey and (col == 'termin' or col == 'data_wplaty')}"
-               type="datetime-local"
-               th:name="${col}"
-               th:value="${#dates.format(cell, 'yyyy-MM-dd''T''HH:mm')}"/>
-
-        <!-- NORMALNE POLE -->
-        <input th:if="${col != primaryKey
-                       and col != 'data_urodzenia'
-                       and col != 'data_rozpoczecia'
-                       and col != 'termin'
-                       and col != 'data_wplaty'}"
-               type="text" th:name="${col}"/>
-
-        <!-- DOZWOLONE WARTOŚCI -->
-        <div style="font-size: 10px; color: gray;">
-
-            <span th:if="${col == 'rodzaj'}">
-                Dozwolone: WEWNETRZNY_TEORIA, PANSTWOWY_TEORIA, PANSTWOWY_PRAKTYKA
-            </span>
-
-            <span th:if="${col == 'wynik'}">
-                Dozwolone: POZYTYWNY, NEGATYWNY, ZAPLANOWANY, NIEOBECNY
-            </span>
-
-            <span th:if="${col == 'id_kategorii' or col == 'id_kategorii_glownej'}">
-                Dozwolone: A, A1, A2, B, B1, C, C1, D, D1, T
-            </span>
-
-            <span th:if="${col == 'status' and tableName == 'kurs'}">
-                Dozwolone: W_TRAKCIE, ZAKONCZONY, ANULOWANY
-            </span>
-
-            <span th:if="${col == 'status' and tableName == 'jazda'}">
-                Dozwolone: ZAPLANOWANA, ODBYTA, ANULOWANA
-            </span>
-
-            <span th:if="${col == 'metoda_platnosci'}">
-                Przykłady: GOTÓWKA, KARTA, PRZELEW, BLIK
-            </span>
-
-            <span th:if="${col == 'nazwa' and tableName == 'rola'}">
-                Dozwolone: ADMIN, PRACOWNIK, EGZAMINATOR, KURSANT
-            </span>
-
-            <span th:if="${col == 'id_roli'}">
-                Dozwolone: 1=ADMIN, 3=PRACOWNIK, 4=EGZAMINATOR, 5=KURSANT
-            </span>
-
-        </div>
-
-        <br/>
-    </div>
-
-    <button type="submit">Dodaj</button>
-</form>
-
+<p th:if="${#lists.isEmpty(rows)}">Brak danych w tej tabeli.</p>
 </body>
 </html>

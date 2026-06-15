@@ -2,25 +2,26 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Baza danych</title>
+    <title>Panel bazy danych</title>
 </head>
 <body>
+<h1>Wszystkie informacje z bazy</h1>
 
-<h1>Lista tabel</h1>
+<p><a th:href="@{/}">Strona glowna</a></p>
 
 <table border="1">
     <tr>
-        <th>Nazwa tabeli</th>
-        <th>Akcja</th>
+        <th>Tabela</th>
+        <th>Kolumny</th>
+        <th>Wiersze</th>
+        <th>Akcje</th>
     </tr>
-
     <tr th:each="table : ${tables}">
-        <td th:text="${table}"></td>
-        <td>
-            <a th:href="@{'/admin/baza/' + ${table}}">Otwórz</a>
-        </td>
+        <td th:text="${table.name()}"></td>
+        <td th:text="${table.columnCount()}"></td>
+        <td th:text="${table.rowCount()}"></td>
+        <td><a th:href="@{/admin/baza/{tableName}(tableName=${table.name()})}">Pokaz dane</a></td>
     </tr>
 </table>
-
 </body>
 </html>
