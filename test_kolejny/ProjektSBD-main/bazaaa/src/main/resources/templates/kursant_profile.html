@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mój profil</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+</head>
+<body>
+
+<h1>Mój profil</h1>
+<p><a th:href="@{/}">Strona glowna</a></p>
+<br>
+<table border="1">
+    <tr>
+        <th>Login</th>
+        <td th:text="${user.login}"></td>
+    </tr>
+    <tr>
+        <th>Hasło</th>
+        <td th:text="${user.haslo}"></td>
+    </tr>
+    <tr>
+        <th>PESEL</th>
+        <td th:text="${kursant.pesel}"></td>
+    </tr>
+    <tr>
+        <th>Imię</th>
+        <td th:text="${kursant.imie}"></td>
+    </tr>
+    <tr>
+        <th>Nazwisko</th>
+        <td th:text="${kursant.nazwisko}"></td>
+    </tr>
+    <tr>
+        <th>Data urodzenia</th>
+        <td th:text="${kursant.data_urodzenia}"></td>
+    </tr>
+    <tr>
+        <th>Telefon</th>
+        <td th:text="${kursant.telefon}"></td>
+    </tr>
+    <tr>
+        <th>Email</th>
+        <td th:text="${kursant.email}"></td>
+    </tr>
+</table>
+
+</body>
+</html>

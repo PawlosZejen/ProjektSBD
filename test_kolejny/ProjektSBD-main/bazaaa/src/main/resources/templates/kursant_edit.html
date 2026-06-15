@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edytuj kursanta</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+</head>
+<body>
+
+<h1>Edytuj kursanta</h1>
+<p><a th:href="@{/kursanci}">Confji</a></p>
+<br>
+<form th:action="@{/kursanci/update}" th:object="${kursant}" method="post">
+
+    <input type="hidden" th:field="*{pesel}">
+
+    Imie:
+    <input type="text" th:field="*{imie}">
+    <br><br>
+
+    Nazwisko:
+    <input type="text" th:field="*{nazwisko}">
+    <br><br>
+
+    Data Urodzenia:
+    <input type="date" th:field="*{data_urodzenia}">
+    <br><br>
+
+    Telefon:
+    <input type="text" th:field="*{telefon}">
+    <br><br>
+
+    Email:
+    <input type="email" th:field="*{email}">
+    <br><br>
+
+    <button type="submit">Zapisz zmiany</button>
+</form>
+
+</body>
+</html>

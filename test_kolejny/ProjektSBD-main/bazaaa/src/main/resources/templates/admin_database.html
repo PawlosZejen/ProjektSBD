@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel bazy danych</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+</head>
+<body>
+<h1>Wszystkie informacje z bazy</h1>
+
+<p><a th:href="@{/}">Strona glowna</a></p>
+
+<table border="1">
+    <tr>
+        <th>Tabela</th>
+        <th>Kolumny</th>
+        <th>Wiersze</th>
+        <th>Akcje</th>
+    </tr>
+    <tr th:each="table : ${tables}">
+        <td th:text="${table.name()}"></td>
+        <td th:text="${table.columnCount()}"></td>
+        <td th:text="${table.rowCount()}"></td>
+        <td><a th:href="@{/admin/baza/{tableName}(tableName=${table.name()})}">Pokaz dane</a></td>
+    </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Kursanci</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+</head>
+<body>
+
+<h1>Lista kursantów</h1>
+<p><a th:href="@{/}">Strona glowna</a></p>
+<br>
+<a href="/kursanci/add">Dodaj kursanta</a>
+
+<table border="1">
+    <tr>
+        <th>Pesel</th>
+        <th>Imie</th>
+        <th>Nazwisko</th>
+        <th>Data Urodzenia</th>
+        <th>Telefon</th>
+        <th>Email</th>
+        <th>Akcje</th>
+    </tr>
+
+    <tr th:each="k : ${kursanci}">
+        <td th:text="${k.pesel}"></td>
+        <td th:text="${k.imie}"></td>
+        <td th:text="${k.nazwisko}"></td>
+        <td th:text="${k.data_urodzenia}"></td>
+        <td th:text="${k.telefon}"></td>
+        <td th:text="${k.email}"></td>
+        <td>
+            <a th:href="@{'/kursanci/edit/' + ${k.pesel}}">Edytuj</a>
+            <a th:href="@{'/kursanci/delete/' + ${k.pesel}}">Usuń</a>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
