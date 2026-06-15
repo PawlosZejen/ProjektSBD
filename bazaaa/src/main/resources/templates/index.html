@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Strona glowna</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
 </head>
 <body>
 <h1>Witaj w systemie OSK!</h1>
 
-<div th:if="${admin}">
+<div class="panel" th:if="${admin}">
     <h2>Panel admina</h2>
     <ul>
         <li><a th:href="@{/admin/baza}">Wszystkie informacje z bazy</a></li>
@@ -17,14 +18,12 @@
     </ul>
 </div>
 
-<div th:if="${!admin}">
+<div class="panel" th:if="${!admin}">
     <h2>Panel Kursanta</h2>
     <ul>
         <li><a th:href="@{/kursanci/profile}">Mój profil</a></li>
     </ul>
 </div>
-
-
 
 <form th:action="@{/logout}" method="post">
     <button type="submit">Wyloguj</button>
